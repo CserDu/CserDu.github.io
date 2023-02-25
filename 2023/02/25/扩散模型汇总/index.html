@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cserdu.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false,"scrollpercent":true,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="扩散模型汇总一、diffusion model视角 1理解扩散模型最简单的方式是将它看成一个马尔科夫多层变分自编码器，并且具有三个限制：  隐空间向量的维度和数据维度一致； 隐空间向量编码器不需要学习，中间每一个向量都是基于前一个向量的高斯分布； 隐空间向量&#x2F;高斯分布的参数随着时间变化，最终是一个标准的高斯分布。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="扩散模型汇总">
+<meta property="og:url" content="https://cserdu.github.io/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/index.html">
+<meta property="og:site_name" content="CserDuのBlog">
+<meta property="og:description" content="扩散模型汇总一、diffusion model视角 1理解扩散模型最简单的方式是将它看成一个马尔科夫多层变分自编码器，并且具有三个限制：  隐空间向量的维度和数据维度一致； 隐空间向量编码器不需要学习，中间每一个向量都是基于前一个向量的高斯分布； 隐空间向量&#x2F;高斯分布的参数随着时间变化，最终是一个标准的高斯分布。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="d:\research\AIGC\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB.assets\image-20230130172919805.png">
+<meta property="og:image" content="d:\research\AIGC\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB.assets\image-20230130181014944.png">
+<meta property="og:image" content="d:\research\AIGC\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB.assets\image-20230130181223954.png">
+<meta property="og:image" content="d:\research\AIGC\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB.assets\image-20230130181310697.png">
+<meta property="article:published_time" content="2023-02-25T15:50:27.739Z">
+<meta property="article:modified_time" content="2023-02-25T15:51:43.364Z">
+<meta property="article:author" content="CserDu">
+<meta property="article:tag" content="扩散模型">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="d:\research\AIGC\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B\%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB.assets\image-20230130172919805.png">
+
+<link rel="canonical" href="https://cserdu.github.io/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>扩散模型汇总 | CserDuのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="CserDuのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">CserDuのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">岁月无痕,有迹可寻</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">5</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">2</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">3</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/CserDu" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://cserdu.github.io/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="CserDu">
+      <meta itemprop="description" content="大业之举，起因宵小而动">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CserDuのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          扩散模型汇总
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-25 23:50:27 / 修改时间：23:51:43" itemprop="dateCreated datePublished" datetime="2023-02-25T23:50:27+08:00">2023-02-25</time>
+            </span>
+
+          
+            <span id="/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/" class="post-meta-item leancloud_visitors" data-flag-title="扩散模型汇总" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="扩散模型汇总"><a href="#扩散模型汇总" class="headerlink" title="扩散模型汇总"></a>扩散模型汇总</h1><h2 id="一、diffusion-model"><a href="#一、diffusion-model" class="headerlink" title="一、diffusion model"></a>一、diffusion model</h2><h3 id="视角-1"><a href="#视角-1" class="headerlink" title="视角 1"></a>视角 1</h3><p>理解扩散模型最简单的方式是将它看成一个马尔科夫多层变分自编码器，并且具有三个限制：</p>
+<ul>
+<li>隐空间向量的维度和数据维度一致；</li>
+<li>隐空间向量编码器不需要学习，中间每一个向量都是基于前一个向量的高斯分布；</li>
+<li>隐空间向量&#x2F;高斯分布的参数随着时间变化，最终是一个标准的高斯分布。</li>
+</ul>
+<span id="more"></span>
+
+<p>从第一个限制出发，后验分布：<br>$$<br>q(x_{1:T}|x_0)&#x3D;\prod_{t&#x3D;1}^Tq(x_t|x_{t-1})<br>$$<br>式中，$x_0$表示初始数据，$x_{1}…x_T$表示中间隐向量。</p>
+<p>根据第二个限制，$encoder\ transitions$定义为：<br>$$<br>q(x_t|x_{t-1})&#x3D;N(x_t;\sqrt{\alpha_t}x_{t-1},(1-\alpha_t)I)<br>$$<br>即：$x_t&#x3D;\sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_t}z_t$，其中$z_t\sim N(0,I)$. </p>
+<p>那么递推可以得到：$x_t&#x3D;\sqrt{\overline{\alpha}<em>t}x</em>{0}+\sqrt{1-\overline{\alpha}_t}\overline{z}_t$，其中$\overline{z}_t\sim N(0,I)$.</p>
+<p>根据第三个限制：<br>$$<br>p(x_{0:T})&#x3D;p(x_T) \prod_{t&#x3D;1}^T p_\theta(x_{t-1}|x_t)<br>$$<br>其中，$p(x_T)&#x3D;N(x_t;0,I)$，$p_\theta(x_{t-1}|x_t)$是逆扩散过程的$transitions$，也就是我们需要学习的网络，$\theta$是参数。</p>
+<p>对于正向扩散过程，并没有可学习的参数，所以我们主要考虑优化逆向过程$p_\theta(x_{t-1}|x_t)$，$\theta$就是需要学习的网络参数。</p>
+<p>和$HVAE$一样，扩散模型的优化目标也是最大化对数似然函数，其推导过程如下：<br>$$<br>\begin{align}<br>\log p(x)<br>&amp;&#x3D;\log \int p(x_{0:T})dx_{1:T}\<br>&amp;&#x3D;\log \int \frac{p(x_{0:T})q(x_{1:T}|x_0)}{q(x_{1:T}|x_0)}dx_{1:T}\<br>&amp;&#x3D;\log E_{q(x_{1:T}|x_0)}[\frac{p(x_{0:T})}{q(x_{1:T}|x_0)}]\<br>&amp;\ge E_{q(x_{1:T}|x_0)} [ \log \frac{p(x_{0:T})}{q(x_{1:T}|x_0)}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [ \log \frac{p(x_T)\prod_{t&#x3D;1}^T p_\theta(x_{t-1}|x_t)}{\prod_{t&#x3D;1}^Tq(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [ \log \frac{p(x_T)p_\theta(x_0|x_1) \prod_{t&#x3D;2}^Tp_\theta(x_{t-1}|x_t)}{ q(x_T|x_{T-1})\prod_{t&#x3D;1}^{T-1}q(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [ \log \frac{p(x_T)p_\theta(x_0|x_1) \prod_{t&#x3D;1}^{T-1}p_\theta(x_{t}|x_{t+1})}{q(x_T|x_{T-1})\prod_{t&#x3D;1}^{T-1}q(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [ \log \frac{p(x_T)p_\theta(x_0|x_1)}{q(x_T|x_{T-1})}]+E_{q(x_{1:T}|x_0)} [ \log \prod_{t&#x3D;1}^{T-1} \frac{p_\theta(x_t|x_{t+1})}{q(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)}[\log p_\theta(x_0|x_1)]+E_{q(x_{1:T}|x_0)} [\log \frac{p(x_T)}{q(x_T|x_{T-1})}]+E_{q(x_{1:T}|x_0)} [\sum_{t&#x3D;1}^{T-1} \frac{p_\theta(x_t|x_{t+1})}{q(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_1|x_0)}[\log p_\theta(x_0|x_1)]+E_{q(x_{T-1},x_T|x_0)}[\log \frac{p(x_T)}{q(x_T|x_{T-1})}]+\sum_{t&#x3D;1}^{T-1} E_{q(x_{t-1},x_t,x_{t+1}|x_0)} [\frac{p_\theta(x_t|x_{t+1})}{q(x_t|x_{t-1})}]\<br>&amp;&#x3D;\underbrace{E_{q(x_1|x_0)}[\log p_\theta(x_0|x_1)]}<em>{重构项}-\underbrace{E</em>{q(x_{T-1}|x_0)}[D_{KL}(q(x_T|x_{T-1})||p(x_T))]}<em>{先验匹配项}-\sum</em>{t&#x3D;1}^{T-1} \underbrace{E_{q(x_{t-1},x_t+1|x_0)}[D_{KL}(q(x_t|x_{t-1})||p_\theta(x_t|x_{t+1}))]}<em>{一致项}\<br>&amp;&#x3D;L_0-L_T-\sum</em>{i&#x3D;1}^{T-1}L_i<br>\end{align}<br>$$<br>为了最大化$\log p(x)$，我们需要最大化$L_0$，最小化$L_T$和$L_i$.</p>
+<p>上述所有项都是计算期望值，可以使用蒙特卡洛采样近似计算。但是仍然存在一个问题，对于每个$L_i$，需要采样$x_{t-1}$和$x_{t+1}$来计算$x_t$，方差过大，因此需要改进。主要的改进思路是消除一个量，关键的地方在于：<br>$$<br>q(x_t|x_{t-1})&#x3D;q(x_t|x_{t-1},x_0)<br>$$<br>根据马尔科夫链的性质，式$(16)$显然成立。</p>
+<p>那么根据贝叶斯规则：<br>$$<br>q(x_t|x_{t-1},x_0)&#x3D;\frac{q(x_{t-1}|x_t,x_0)q(x_t|x_0)}{q(x_{t-1}|x_0)}<br>$$<br>再回到式$(8)$：<br>$$<br>\begin{align}<br>\log p(x)<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)}[\log \frac{p(x_T)\prod_{t&#x3D;1}^T p_\theta(x_{t-1}|x_t)}{\prod_{t&#x3D;1}^T q(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [\log \frac{p(x_T)p_\theta(x_0|x_1)\prod_{t&#x3D;2}^Tp_\theta(x_{t-1}|x_t)}{q(x_1|x_0)\prod_{t&#x3D;2}^Tq(x_t|x_{t-1})}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [\log \frac{p(x_T)p_\theta(x_0|x_1)}{q(x_1|x_0)}+ \log \prod_{t&#x3D;2}^T \frac{p_\theta(x_{t-1}|x_t)}{q(x_t|x_{t-1},x_0)}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)} [\log \frac{p(x_T)p_\theta(x_0|x_1)}{q(x_1|x_0)}+\log \prod_{t&#x3D;2}^T \frac{p_\theta(x_{t-1}|x_t)}{\frac{q(x_{t-1}|x_t,x_0)q(x_t|x_0)}{q(x_{t-1}|x_0)}}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)}[\log \frac{p(x_T)p_\theta(x_0|x_1)}{q(x_1|x_0)}+ \log \prod_{t&#x3D;2}^T (\frac{p_\theta(x_{t-1}|x_t)}{q(x_{t-1}|x_t,x_0)}\cdot \frac{q(x_{t-1}|x_0)}{q(x_t|x_0)})]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)}[\log \frac{p(x_T)p_\theta(x_0|x_1)}{q(x_1|x_0)}+\log \frac{q(x_1|x_0)}{q(x_T|x_0)}+ \log \prod_{t&#x3D;2}^T \frac{p_\theta(x_{t-1}|x_t)}{q(x_{t-1}|x_t,x_0)}]\<br>&amp;&#x3D;E_{q(x_{1:T}|x_0)}[\log \frac{p(x_T)p_\theta(x_0|x_1)}{q(x_T|x_0)}+\sum_{t&#x3D;2}^T \frac{p_\theta(x_{t-1}|x_t)}{q(x_{t-1}|x_t,x_0)}]\<br>&amp;&#x3D;E_{q(x_1|x_0)}[\log p_\theta(x_0|x_1)]+E_{q(x_T|x_0)}[\log \frac{p(x_T)}{q(x_T|x_0)}]+\sum_{t&#x3D;2}^T E_{q(x_t,x_{t-1}|x_0)}[\log \frac{p_\theta(x_{t-1}|x_t)}{q(x_{t-1}|x_t,x_0)}]\<br>&amp;&#x3D;\underbrace{E_{q(x_1|x_0)}[\log p_\theta(x_0|x_1)]}<em>{重构项}-\underbrace{D</em>{KL}(q(x_T|x_0)||p(x_T))}<em>{先验匹配项}-\sum</em>{t&#x3D;2}^T \underbrace{E_{q(x_t|x_0)}[D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t))]}<em>{去噪匹配项}\<br>&amp;&#x3D;L_0-L_T-\sum</em>{i&#x3D;2}^T L_i<br>\end{align}<br>$$<br>注意到，当式$(26)$中$T&#x3D;1$时，扩散模型与普通的$VAE$模型的优化目标一样。</p>
+<p>根据式$(26)$，扩散模型优化的主要目标就是去噪匹配项。对于每一项$KL$散度$D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t))$中的$q(x_{t-1}|x_t,x_0)$，我们可以求出它是一个高斯分布：<br>$$<br>\begin{align}<br>q(x_{t-1}|x_t,x_0)<br>&amp;&#x3D;\frac{q(x_t|x_{t-1},x_0)q(x_{t-1}|x_0)}{q(x_t|x_0)}\<br>&amp;&#x3D;\frac{q(x_t|x_{t-1})q(x_{t-1}|x_0)}{q(x_t|x_0)}\<br>&amp;&#x3D;\frac{N(x_t;\sqrt{\alpha_t}x_{t-1},(1-\alpha_t)I) \cdot N(x_{t-1};\sqrt{\overline{\alpha}<em>{t-1}}x_0,(1-\overline{\alpha}</em>{t-1})I)}{N(x_t;\sqrt{\overline{\alpha}<em>t}x_0,(1-\overline{\alpha}<em>t)I)}\<br>&amp;\varpropto e^{-\frac{(x_t-\sqrt{\alpha_t}x</em>{t-1})^2}{2(1-\alpha_t)}+\frac{(x</em>{t-1}-\sqrt{\overline{\alpha}<em>{t-1}}x_0)^2}{2(1-\overline{\alpha}</em>{t-1})}-\frac{(x_t-\sqrt{\overline{\alpha}<em>t}x_0)^2}{2(1-\overline{\alpha}<em>t)}}\<br>&amp;\varpropto N(x</em>{t-1};\underbrace{\frac{\sqrt{\alpha_t}(1-\overline{\alpha}<em>t)x_t+\sqrt{\overline{\alpha}</em>{t-1}}(1-\alpha_t)x_0}{1-\overline{\alpha}<em>t}}</em>{\mu_q(x_t,x_0)},\underbrace{\frac{(1-\alpha_t)(1-\overline{\alpha}</em>{t-1})}{1-\overline{\alpha}<em>t}I}</em>{\Sigma_q(t)})<br>\end{align}<br>$$<br>根据式$(32)$，$q(x_{t-1}|x_t,x_0)$是一个均值为$\mu_q(x_t,x_0)$，方差为$\Sigma_q(t)$的高斯分布，其中方差是一个常数。</p>
+<p>所以为了优化$KL$散度，我们也将$p_\theta(x_{t-1}|x_t)$建模为高斯分布，即$p_\theta(x_{t-1}|x_t)&#x3D;N(x_{t-1};\mu_\theta,\Sigma_q(t))$.</p>
+<p>对于两个一元高斯分布，$KL$散度计算表达式为：<br>$$<br>KL(N(\mu_1,\sigma_1^2)||N(\mu_2,\sigma_2^2))&#x3D;\log \frac{\sigma_2}{\sigma_1}-\frac{1}{2}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}<br>$$<br>对于多元高斯分布，其概率密度函数表达式为：<br>$$<br>N(x;\mu,\Sigma)&#x3D;\frac{1}{(2\pi)^K|\Sigma|^{\frac{1}{2}}}e^{-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)}<br>$$<br>当$K&#x3D;1$时，对应一元高斯分布概率密度函数。</p>
+<p>两个多元高斯分布的$KL$散度表达式为：<br>$$<br>KL(N(x;\mu_1,\Sigma_1)||N(x;\mu_2,\Sigma_2))&#x3D;\frac{1}{2}[\log \frac{|\Sigma_2|}{|\Sigma_1|}-K+tr(\Sigma_2^{-1}\Sigma_1)+(\mu_1-\mu_2)^T\Sigma_2^{-1}(\mu_1-\mu_2)]<br>$$<br>所以：<br>$$<br>\begin{align}<br>&amp;\underset{\theta}{\arg \min}\ D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t))\<br>&#x3D;&amp;\underset{\theta}{\arg \min}\ D_{KL}(N(x_{t-1};\mu_q,\Sigma_q(t))||N(x_{t-1};\mu_\theta,\Sigma_q(t)))\<br>&#x3D;&amp;\underset{\theta}{\arg \min}\ \frac{1}{2}[\log \frac{|\Sigma_q(t)|}{|\Sigma_q(t)|}-d+tr(\Sigma_q(t)^{-1}\Sigma_q(t))+(\mu_q-\mu_\theta)\Sigma_q(t)^{-1}(\mu_q-\mu_\theta)]\<br>&#x3D;&amp;\underset{\theta}{\arg \min}\ \frac{1}{2}[\log 1-d+d+(\mu_q-\mu_\theta)\Sigma_q(t)^{-1}(\mu_q-\mu_\theta)]\<br>&#x3D;&amp;\underset{\theta}{\arg \min}\ \frac{1}{2}[(\mu_q-\mu_\theta)\Sigma_q(t)^{-1}(\mu_q-\mu_\theta)]\<br>&#x3D;&amp;\underset{\theta}{\arg \min}\ \frac{1}{2\Sigma_q(t)}||\mu_q-\mu_\theta||^2_2<br>\end{align}<br>$$<br>在式$(32)$中$\mu_q&#x3D;\frac{\sqrt{\alpha_t}(1-\overline{\alpha}<em>t)x_t+\sqrt{\overline{\alpha}</em>{t-1}}(1-\alpha_t)x_0}{1-\overline{\alpha}_t}$，为了让$\mu_\theta$尽可能接近$\mu_q$，我们也可以将$\mu_\theta$定义成$\mu_q$的形式，但是不能依靠$x_0$，因为网络去噪的目标就是生成$x_0$，所以不知道$x_0$的值。<br>$$<br>\mu_\theta(x_t,t)&#x3D;\frac{\sqrt{\alpha_t}(1-\overline{\alpha}<em>t)x_t+\sqrt{\overline{\alpha}</em>{t-1}}(1-\alpha_t)x_\theta(x_t,t)}{1-\overline{\alpha}_t}<br>$$<br>其中，$x_\theta(x_t,t)$就是我们的网络预测的$x_0$.</p>
+<p>带入到式$(42)$中，得到：<br>$$<br>\begin{align}<br>&amp;\underset{\theta}{\arg \min}\ D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t))\<br>&#x3D;&amp;\underset{\theta}{\arg \min}\ \frac{1}{2\Sigma_q(t)}[||\frac{\sqrt{\alpha_t}(1-\alpha_t)}{1-\overline{\alpha}<em>t}(x_\theta(x_t,t)-x_0)||^2]<br>\end{align}<br>$$<br>综上，扩散模型的目标就是去训练一个神经网络，从任意的噪声图片$x_t$中去预测$x_0$.<br>$$<br>\underset{\theta}{\arg \min}\ E</em>{t\sim U(2,T)}(E_{q(x_t|x_0)}[D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t))])<br>$$</p>
+<h3 id="视角-2"><a href="#视角-2" class="headerlink" title="视角 2"></a>视角 2</h3><p>上述从$x_t$预测$x_0$是一种理解，还可以从预测噪声$\epsilon_\theta(x_t,t)$的角度来理解。</p>
+<p>根据$x_t&#x3D;\sqrt{\overline{\alpha}<em>t}x</em>{0}+\sqrt{1-\overline{\alpha}_t}\overline{z}_t$，可以得到：<br>$$<br>x_0&#x3D;\frac{x_t-\sqrt{1-\overline{\alpha}_t}\overline{z}_t}{\sqrt{\overline{\alpha}_t}}<br>$$<br>将上式带入到式$(32)$中的$\mu_q(x_t,x_0)$，得到：<br>$$<br>\mu_q(x_t)&#x3D;\frac{1}{\sqrt{\alpha_t}}x_t-\frac{1-\alpha_t}{\sqrt{(1-\overline{\alpha}_t)\alpha_t}}\overline{z}_t<br>$$<br>式$(47)$与式$(32)$的区别在于将$x_0$替换成了$\overline{z}_t$（这里的$\overline{z}<em>t$表示从$x</em>{t-1}$到$x_t$添加的高斯噪声），那么同理，最终的优化目标就变成了：<br>$$<br>\underset{\theta}{\arg \min}\ \frac{1}{2\Sigma_q(t)}\frac{(1-\alpha_t)^2}{(1-\overline{\alpha}_t)\alpha_t}[||\overline{z}_t-\epsilon_\theta(x_t,t)||^2_2]<br>$$</p>
+<h3 id="视角-3"><a href="#视角-3" class="headerlink" title="视角 3"></a>视角 3</h3><p>从$score\ function$的角度去理解扩散模型。</p>
+<p>首先需要知道$Tweedie’s\ Formula$：对于一个高斯变量$z\sim N(z;\mu_z,\Sigma_z)$，有：<br>$$<br>E\ [\mu_z|z]&#x3D;z+\Sigma_z\nabla_z \log p(z)<br>$$<br>根据$x_t&#x3D;\sqrt{\overline{\alpha}<em>t}x</em>{0}+\sqrt{1-\overline{\alpha}<em>t}\overline{z}<em>t$，有：<br>$$<br>E\ [\mu</em>{x_t}|x_t]&#x3D;x_t+(1-\overline{\alpha}<em>t)\nabla</em>{x_t} \log p(x_t)<br>$$<br>$E\ [\mu</em>{x_t|x_t}]$表示对$x_t$的均值估计，那么理想的$groud\ truth$就是$\sqrt{\overline{\alpha}_t}x_0$.</p>
+<p>所以：<br>$$<br>\begin{align}<br>\sqrt{\overline{\alpha}<em>t}x_0&#x3D;x_t+(1-\overline{\alpha}<em>t)\nabla</em>{x_t} \log p(x_t)\<br>x_0&#x3D;\frac{x_t+(1-\overline{\alpha}<em>t)\nabla</em>{x_t} \log p(x_t)}{\sqrt{\overline{\alpha}<em>t}}<br>\end{align}<br>$$<br>同样的道理，我们把式$(52)$带入式$(32)$中的$\mu_q(x_t,x_0)$，得到：<br>$$<br>\mu_q(x_t)&#x3D;\frac{1}{\sqrt{\alpha_t}}x_t+\frac{1-\alpha_t}{\sqrt{\alpha_t}}\nabla</em>{x_t} \log p(x_t)<br>$$<br>与式$(32)$相比，把$x_0$替换成了$\nabla</em>{x_t} \log p(x_t)$.</p>
+<p>最终的优化目标就是：<br>$$<br>\underset{\theta}{\arg \min}\ \frac{1}{2\Sigma_q(t)}\frac{(1-\alpha_t)^2}{\alpha_t}[||s_\theta(x_t,t)-\nabla_{x_t}\log p(x_t)||^2]<br>$$<br>如何理解这个$\nabla_{x_t}\log p(x_t)$呢？（注意这里的$p$不是$p_\theta$，它表示$x_t$的概率密度函数）</p>
+<p>本质上，这个$score \ function$是概率密度函数的对数求导，不考虑对数，那就是概率密度函数的导数。考虑高斯分布，均值左侧的点的导数都大于0，均值右侧的点的导数都小于0，而在均值处导数为0. 很显然，这个导数值反映的是各个点朝着均值处的方向，也就意味着似然对数最大的方向。并且，如果两个概率密度函数的导数相等，那么这两个概率分布只相差一个常数，即上下平移得到，又因为概率分布的积分等于1，所以这两个概率分布只能相同！这也就意味着，让网络去拟合$score\ function$，如果训练的足够好，那么这个网络就与数据分布相同。而这一项是从2到$T$的求和，那也就表明从2到$T$拟合的数据分布与原数据相同，那么去噪过程自然也就可以还原出原图了。</p>
+<p>其实，$score function$与另一类模型——$ score \ based\ generative \ model$关联密切。对于任意的概率密度函数，我们可以写成一种通用的形式：<br>$$<br>p_\theta(x)&#x3D;\frac{1}{Z_\theta}e^{-f_\theta(x)}<br>$$<br>其中$Z_\theta$是归一化常数，$Z_\theta&#x3D;\int e^{-f_\theta(x)}dx$.</p>
+<p>通常情况下，$Z_\theta$是很难求解的一个量。为了方便利用式$(55)$，使用$\nabla_x \log p_\theta(x)$：<br>$$<br>\begin{align}<br>\nabla_x \log p_\theta(x)<br>&amp;&#x3D;\nabla_x \log (\frac{1}{Z_\theta}e^{-f_\theta(x)})\<br>&amp;&#x3D;-\nabla_x \log f_\theta(x)<br>\end{align}<br>$$<br>可以看到，通过求导，消除了归一化常数$Z_\theta$. 所以在这里模型中，通常用神经网络去拟合$\nabla_x\log p_\theta(x)$，这与直接拟合$p_\theta(x)$效果是等价的，最终都会使得网络学习到的数据分布与原数据分布相同。</p>
+<h3 id="视角-4"><a href="#视角-4" class="headerlink" title="视角 4"></a>视角 4</h3><p>从$SDE$的角度去理解扩散模型，在此之前，先了解一下布朗运动、伊藤积分以及随机微分方程（$SDE$）的一些知识。</p>
+<p>我们假设在时刻$t$，花粉的位置为$B_t$，那么在一个很小的时间段$\Delta t$内，其位置的增量是一个均值为0的正态分布：<br>$$<br>B_{t+\Delta t}&#x3D;B_t+\alpha*N(0,\Delta t)<br>$$<br>如果$\alpha&#x3D;1$，那么就是标准的布朗运动，我们主要研究的就是它，即：<br>$$<br>B_{t+\Delta t}&#x3D;B_t+N(0,\Delta t)<br>$$<br>标准布朗运动有个很重要的性质：连续但是几乎处处不可微分。当$\Delta t \to 0$时，$B_t$是连续的，但是却无法对其进行微分，因为每一个增量都来自一个正态分布。</p>
+<p>因为$B_t$无法求微分，所以如果在一个微分方程中含有类似$B_t$这样的布朗运动，那么就无法使用常微分方程（$ODE$）的方法求解。因此需要定义一个新的积分，伊藤积分：<br>$$<br>\int_0^t g(X_s,s)dB_s<br>$$<br>关于$SDE$，通常写成微分的形式：<br>$$<br>dX_t&#x3D;f(t,X_t)dt+\sigma(t,X_t)dW_t<br>$$<br>其中，$f(\cdot)$被称作漂移项，$\sigma(\cdot)$被称作扩散项，$dW_t$就是布朗运动的微小增量。</p>
+<p>接下来从$SDE$的角度来介绍扩散模型：</p>
+<p>前向过程是一个高斯扩散过程，现在我们将这个过程连续化，考虑$\Delta t$时间内的扩散，那么$\beta_t$在时间上也是连续的，令$\beta_t&#x3D;\beta(t)\Delta t$.那么：<br>$$<br>\begin{align}<br>x_t<br>&amp;&#x3D;\sqrt{1-\beta_t}x_{t-1}+\sqrt{\beta_t}N(0,I)\<br>&amp;&#x3D;\sqrt{1-\beta(t)\Delta t}x_{t-1}+\sqrt{\beta(t)\Delta t}N(0,I)\<br>\end{align}<br>$$<br>当$\Delta t \to 0$时，对$(63)$进行一阶泰勒展开，则：<br>$$<br>\begin{align}<br>x_t<br>&amp;\approx (1-\frac{\beta(t)\Delta t}{2})x_{t-1}+\sqrt{\beta(t)\Delta t}N(0,I)\<br>&amp;&#x3D;x_{t-1}-\frac{\beta(t)\Delta t}{2}x_{t-1}+\sqrt{\beta(t)\Delta t}N(0,I)<br>\end{align}<br>$$<br>所以：<br>$$<br>dx_t&#x3D;-\frac{1}{2}\beta(t)x_tdt+\sqrt{\beta(t)}dw_t<br>$$<br>比较$(61)$与$(61)$，可以发现扩散过程就是$SDE$过程，并且：<br>$$<br>f(x_t,t)&#x3D;-\frac{1}{2}\beta(t)x_t\<br>\sigma(x_t,t)&#x3D;\sqrt{\beta(t)}<br>$$<br>既然前向过程是一个$SDE$过程，那么根据已有结论，一个$SDE$的逆向过程也是一个$SDE$，并且逆向$SDE$的表达式为：<br>$$<br>dx&#x3D;[f(x,t)-g(t)^2\nabla_x \log p_t(x)]dt+g(t)d\overline{w}<br>$$<br>上式中$g(t)$对应$\sigma(t,x_t)$.</p>
+<p>带入到扩散模型中，得到：<br>$$<br>dx_t&#x3D;-\frac{1}{2}\beta(t)[x_t+2\nabla_{x_t}log q_t(x_t)]dt+\sqrt{\beta(t)}d\overline{w_t}<br>$$<br>并且，已经证明，每个扩散过程都有对应的确定性的$ODE$形式，表达式为：<br>$$<br>dx&#x3D;[f(x,t)-\frac{1}{2}g(t)^2\nabla_x \log p_t(x)]dt<br>$$<br>带入到扩散模型中，得到：<br>$$<br>dx_t&#x3D;-\frac{1}{2}\beta(x)[x_t+\nabla_{x_t}\log q_t(x_t)]dt<br>$$<br>那么就可以使用$SDE&#x2F;ODE\ solver$来求解。</p>
+<h2 id="二、DDIM"><a href="#二、DDIM" class="headerlink" title="二、DDIM"></a>二、DDIM</h2><h2 id="三、classifier-guidance"><a href="#三、classifier-guidance" class="headerlink" title="三、classifier guidance"></a>三、classifier guidance</h2><p>在逆扩散过程中，加入分类条件$y$时，使用下面的方式采样：<br>$$<br>\begin{align}<br>p(x_t|x_{t+1},y)<br>&amp;&#x3D;\frac{p(x_t,x_{t+1},y)}{p(x_{t+1},y)}\<br>&amp;&#x3D;\frac{p(x_t,x_{t+1},y)}{p(y|x_{t+1})p(x_{t+1})}\<br>&amp;&#x3D;\frac{p(x_{t+1})p(x_t|x_{t+1})p(y|x_t,x_{t+1})}{p(y|x_{t+1})p(x_{t+1})}\<br>&amp;&#x3D;\frac{p(x_t|x_{t+1})p(y|x_t,x_{t+1})}{p(y|x_{t+1})}\<br>&amp;&#x3D;\frac{p(x_t|x_{t+1})p(y|x_t)}{p(y|x_{t+1})}<br>\end{align}<br>$$<br>从$(75)$到$(76)$是因为：</p>
+<p>在上述的逆扩散过程中，我们的目的是<strong>在分类条件$y$的引导下，从$x_{t+1}$去噪得到$x_t$</strong>. 这句话的深层含义是：<strong>对于当前时刻，$x_{t+1}$是已知的，类别引导信息$y$只会影响$x_t$，所以此时$y$与$x_{t+1}$是无关&#x2F;独立的</strong>，那么：<br>$$<br>\begin{align}<br>p(y|x_t,x_{t+1})<br>&amp;&#x3D;p(x_{t+1}|x_t,y)\frac{p(y|x_t)}{p(x_{t+1}|x_t)}\<br>&amp;&#x3D;p(x_{t+1}|x_t)\frac{p(y|x_t)}{p(x_{t+1}|x_t)}\<br>&amp;&#x3D;p(y|x_t)<br>\end{align}<br>$$<br>还需理解的一点是，这个类引导条件$y$到底有什么具体含义或者性质。例如我们现在想要从噪声中生成猫的图片，该怎么添加这个引导信息呢？</p>
+<p>如果$y$代表猫这个类别，那么$p(y)$就表示猫的概率分布，这个概率分布怎么来的？数据集！！！在我们的数据集中，有各种类别的图片，每种类别都有自己的概率分布。因此，当我们给网络提供猫这个类别的引导信息后，去噪过程就会倾向于生成猫这个类别的概率分布。所以，**$p(y)$不仅与$p(x_{t+1})$独立&#x2F;无关，它还是个常量**！！！</p>
+<p>再回到$(76)$，$p(y|x_{t+1})$其实就是$p(y)$，是个常数，所以：<br>$$<br>p_{\theta,\phi}(x_t|x_{t+1},y)&#x3D;Z\cdot p_\theta(x_t|x_{t+1})\cdot p_\phi(y|x_t)<br>$$<br>其中，$Z$是标准化常数。式$(80)$很难求解，可以用高斯分布近似。</p>
+<p><strong>对于$p_\theta(x_t|x_{t+1})$项：</strong>对应无条件引导的逆扩散过程，因此：$p_\theta(x_t|x_{t+1})&#x3D;N(\mu,\sigma^2)&#x3D;\frac{1}{\sqrt{2\pi\sigma}}e^{-\frac{(x_t-\mu)^2}{2\sigma^2}}$. 那么：<br>$$<br>\log p_\theta(x_t|x_{t+1})&#x3D;-\frac{1}{2\sigma^2}(x_t-\mu)^2+C<br>$$<br><strong>对于$p_\phi(y|x_t)$项：</strong>我们对$\log p_\phi(y|x_t)$在$x_t&#x3D;\mu$处进行一阶泰勒展开：<br>$$<br>\begin{align}<br>\log p_\phi(y|x_t)<br>&amp;\approx \log p_\phi(y|x_t)|<em>{x_t&#x3D;\mu}+(x_t-\mu)\nabla</em>{x_t}\log p_\phi(y|x_t)|<em>{x_t&#x3D;\mu}\<br>&amp;&#x3D;(x_t-\mu)g+C_1<br>\end{align}<br>$$<br>其中，$g&#x3D;\nabla</em>{x_t}\log p_\phi(y|x_t)|_{x_t&#x3D;\mu}$ .</p>
+<p>综上所述：<br>$$<br>\begin{align}<br>\log(p_\theta(x_t|x_{t+1})p_\phi(y|x_t))<br>&amp;\approx-\frac{1}{2\sigma^2}(x_t-\mu)^2+(x_t-\mu)g+C_2\<br>&amp;&#x3D;-\frac{1}{2\sigma^2}(x_t-\mu-\sigma^2g)^2+\frac{1}{2}\sigma^2g^2+C_2\<br>&amp;&#x3D;-\frac{1}{2\sigma^2}(x_t-\mu-\sigma^2g)+C_3\<br>&amp;&#x3D;\log p(z)+C_4<br>\end{align}<br>$$<br>其中，$z\sim N(\mu+\sigma^2g,\sigma^2),g&#x3D;\nabla_{x_t}\log p_\phi(y|x_t)|_{x_t&#x3D;\mu}$. </p>
+<p>由上式可以看出，类条件引导的逆扩散过程与无条件类似，都可以用高斯分布近似，但是均值需要加上偏移量$\sigma^2g$ . 算法如下图所示：</p>
+<p><img src="D:\research\AIGC\扩散模型\扩散模型汇总.assets\image-20230130172919805.png" alt="image-20230130172919805"></p>
+<p>​															    	图1 类条件引导的逆扩散采样算法</p>
+<p>此外，如何去理解$g&#x3D;\nabla_{x_t}p_\phi(y|x_t)|_{x_t&#x3D;\mu}$？</p>
+<p><img src="D:\research\AIGC\扩散模型\扩散模型汇总.assets\image-20230130181014944.png" alt="image-20230130181014944"></p>
+<p>​																								图2 计算$g$的代码</p>
+<p>从这段代码可以看出，实际上$g$值与交叉熵损失函数只是相差了一个系数和负号，因为：</p>
+<p><img src="D:\research\AIGC\扩散模型\扩散模型汇总.assets\image-20230130181223954.png" alt="image-20230130181223954"></p>
+<p>​																				图3 直接计算$g$与使用交叉熵损失函数计算对比</p>
+<p>结果为：</p>
+<p><img src="D:\research\AIGC\扩散模型\扩散模型汇总.assets\image-20230130181310697.png" alt="image-20230130181310697"></p>
+<p>​																			        图4 对比结果</p>
+<p>交叉熵损失函数取了均值，所以相差2倍和一个负号。</p>
+<p>从这里可以看出，$\log p_\phi(y|x_t)$衡量了$x_t$与$y$的距离，两者的关系如下：<br>$$<br>\log p_\phi(y|x_t)&#x3D;-N \cdot CrossEntroty(x_t,y)<br>$$<br>所以带条件的$\mu$更新本质上就是使用$SGD$梯度下降法：<br>$$<br>\begin{align}<br>\mu_{t-1}<br>&amp;&#x3D;\mu_t+s\sigma^2\cdot \nabla_{x_t}\log p_\phi(y|x_t)\<br>&amp;&#x3D;\mu_t-\alpha\nabla_\phi(x_t,y)<br>\end{align}<br>$$</p>
+<h2 id="四、classifier-free-guidance"><a href="#四、classifier-free-guidance" class="headerlink" title="四、classifier-free guidance"></a>四、classifier-free guidance</h2>
+    </div>
+
+    
+    
+    
+
+    <div>
+	
+	<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+
+	
+    </div>
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="CserDu 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="CserDu 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>CserDu
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://cserdu.github.io/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/" title="扩散模型汇总">https://cserdu.github.io/2023/02/25/扩散模型汇总/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/" rel="tag"># 扩散模型</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/25/text/" rel="prev" title="测试文章">
+      <i class="fa fa-chevron-left"></i> 测试文章
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB"><span class="nav-text">扩散模型汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81diffusion-model"><span class="nav-text">一、diffusion model</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%92-1"><span class="nav-text">视角 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%92-2"><span class="nav-text">视角 2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%92-3"><span class="nav-text">视角 3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%92-4"><span class="nav-text">视角 4</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81DDIM"><span class="nav-text">二、DDIM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81classifier-guidance"><span class="nav-text">三、classifier guidance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81classifier-free-guidance"><span class="nav-text">四、classifier-free guidance</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="CserDu"
+      src="/images/author.jpg">
+  <p class="site-author-name" itemprop="name">CserDu</p>
+  <div class="site-description" itemprop="description">大业之举，起因宵小而动</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/CserDu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;CserDu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CserDu</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">16k</span>
+</div>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'jUy8Sk60bxVdShi23QliCRa1-gzGzoHsz',
+      appKey     : '3BTde2YZrf9Iav5JY2H355ya',
+      placeholder: "期待与您的交流！",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>
+
+
+<!-- 页面点击小红心 -->
+<script type="text/javascript" src="/js/src/clicklove.js"></script>
+
