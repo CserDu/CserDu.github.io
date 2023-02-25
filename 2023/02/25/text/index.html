@@ -547,7 +547,7 @@
 
 <script>
 NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
-  NexT.utils.getScript('[object Object]', () => {
+  NexT.utils.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js', () => {
     var GUEST = ['nick', 'mail', 'link'];
     var guest = 'nick,mail,link';
     guest = guest.split(',').filter(item => {
@@ -559,7 +559,7 @@ NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
       notify     : true,
       appId      : 'jUy8Sk60bxVdShi23QliCRa1-gzGzoHsz',
       appKey     : '3BTde2YZrf9Iav5JY2H355ya',
-      placeholder: "说点什么吧！",
+      placeholder: "期待与您的交流！",
       avatar     : 'mm',
       meta       : guest,
       pageSize   : '10' || 10,
