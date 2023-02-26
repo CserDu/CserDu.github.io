@@ -6,7 +6,7 @@
   <link href="https://cserdu.github.io/atom.xml" rel="self"/>
   
   <link href="https://cserdu.github.io/"/>
-  <updated>2023-02-26T02:29:58.903Z</updated>
+  <updated>2023-02-26T06:58:36.809Z</updated>
   <id>https://cserdu.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>weekly-notes-1</title>
+    <link href="https://cserdu.github.io/2023/02/26/weekly-notes-1/"/>
+    <id>https://cserdu.github.io/2023/02/26/weekly-notes-1/</id>
+    <published>2023-02-26T06:14:38.000Z</published>
+    <updated>2023-02-26T06:58:36.809Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="glob模块"><a href="#glob模块" class="headerlink" title="glob模块"></a>glob模块</h3><p>glob模块是python标准库中用来搜索符合特定规则的目录或文件路径名，最常用的是glob.glob()和glob.iglob()函数。</p><p>这里的规则是指通配符匹配，有三种：</p><p>?用来匹配单个字符，*用来匹配任意字符，[]用来匹配范围内的字符，例如[0-9]匹配0到9的数字。</p><p>glob()函数还有一个参数是recursive，表示是否递归搜索，默认为False。</p><p>当**与recursive=False结合，返回当前目录下的所有子目录以及文件路径名；</p><p>当**与recursive=True结合，返回当前目录以及所有子目录下的目录和文件路径名。</p><p>iglob()函数与glob()函数的区别在于：iglob返回的是一个可迭代的对象，而glob返回的是一个列表。</p><p>例如：</p><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> glob</span><br><span class="line">glob.glob(<span class="string">&#x27;root_dir/*/img-?.jpg&#x27;</span>) <span class="comment"># 搜索root_dir目录下，任意子目录中名称为img-?.jpg的文件，其中?代表任意单个字符</span></span><br><span class="line">glob.glob(<span class="string">&#x27;root_dir/**&#x27;</span>,recursive=<span class="literal">True</span>) <span class="comment"># 递归搜索root_dir目录下，所有的子目录及文件，以及子目录下的所有目录及文件</span></span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h3 id=&quot;glob模块&quot;&gt;&lt;a href=&quot;#glob模块&quot; class=&quot;headerlink&quot; title=&quot;glob模块&quot;&gt;&lt;/a&gt;glob模块&lt;/h3&gt;&lt;p&gt;glob模块是python标准库中用来搜索符合特定规则的目录或文件路径名，最常用的是glob.glob()和</summary>
+      
+    
+    
+    
+    <category term="python" scheme="https://cserdu.github.io/categories/python/"/>
+    
+    
+    <category term="weekly notes" scheme="https://cserdu.github.io/tags/weekly-notes/"/>
+    
+  </entry>
   
   <entry>
     <title>插入图片2</title>

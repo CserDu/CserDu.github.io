@@ -237,17 +237,17 @@ mjx-container[display="true"] + br {
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">5</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">2</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">3</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">5</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">6</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -299,6 +299,114 @@ mjx-container[display="true"] + br {
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://cserdu.github.io/2023/02/26/weekly-notes-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="CserDu">
+      <meta itemprop="description" content="大业之举，起因宵小而动">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CserDuのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/26/weekly-notes-1/" class="post-title-link" itemprop="url">weekly-notes-1</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-26 14:14:38 / 修改时间：14:58:36" itemprop="dateCreated datePublished" datetime="2023-02-26T14:14:38+08:00">2023-02-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2023/02/26/weekly-notes-1/" class="post-meta-item leancloud_visitors" data-flag-title="weekly-notes-1" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/02/26/weekly-notes-1/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/02/26/weekly-notes-1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>530</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="glob模块"><a href="#glob模块" class="headerlink" title="glob模块"></a>glob模块</h3><p>glob模块是python标准库中用来搜索符合特定规则的目录或文件路径名，最常用的是glob.glob()和glob.iglob()函数。</p>
+<p>这里的规则是指通配符匹配，有三种：</p>
+<p>?用来匹配单个字符，*用来匹配任意字符，[]用来匹配范围内的字符，例如[0-9]匹配0到9的数字。</p>
+<p>glob()函数还有一个参数是recursive，表示是否递归搜索，默认为False。</p>
+<p>当**与recursive=False结合，返回当前目录下的所有子目录以及文件路径名；</p>
+<p>当**与recursive=True结合，返回当前目录以及所有子目录下的目录和文件路径名。</p>
+<p>iglob()函数与glob()函数的区别在于：iglob返回的是一个可迭代的对象，而glob返回的是一个列表。</p>
+<p>例如：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> glob</span><br><span class="line">glob.glob(<span class="string">&#x27;root_dir/*/img-?.jpg&#x27;</span>) <span class="comment"># 搜索root_dir目录下，任意子目录中名称为img-?.jpg的文件，其中?代表任意单个字符</span></span><br><span class="line">glob.glob(<span class="string">&#x27;root_dir/**&#x27;</span>,recursive=<span class="literal">True</span>) <span class="comment"># 递归搜索root_dir目录下，所有的子目录及文件，以及子目录下的所有目录及文件</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <div>
+	
+    </div>
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -872,20 +980,20 @@ mjx-container[display="true"] + br {
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
