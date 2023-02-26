@@ -41,48 +41,6 @@
   </entry>
   
   <entry>
-    <title>插入图片2</title>
-    <link href="https://cserdu.github.io/2023/02/26/%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%872/"/>
-    <id>https://cserdu.github.io/2023/02/26/%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%872/</id>
-    <published>2023-02-26T02:29:07.000Z</published>
-    <updated>2023-02-26T02:29:58.903Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="/2023/02/26/%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%872/大三上课表.png" alt="大三上课表"></p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;&lt;img src=&quot;/2023/02/26/%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%872/大三上课表.png&quot; alt=&quot;大三上课表&quot;&gt;&lt;/p&gt;
-</summary>
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>测试插入图片</title>
-    <link href="https://cserdu.github.io/2023/02/26/%E6%B5%8B%E8%AF%95%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/"/>
-    <id>https://cserdu.github.io/2023/02/26/%E6%B5%8B%E8%AF%95%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/</id>
-    <published>2023-02-26T02:00:16.000Z</published>
-    <updated>2023-02-26T02:09:05.867Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="/2023/02/26/%E6%B5%8B%E8%AF%95%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/大课表.png" alt="大课表"></p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;&lt;img src=&quot;/2023/02/26/%E6%B5%8B%E8%AF%95%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/大课表.png&quot; alt=&quot;大课表&quot;&gt;&lt;/p&gt;
-</summary>
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
     <title>扩散模型汇总</title>
     <link href="https://cserdu.github.io/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/"/>
     <id>https://cserdu.github.io/2023/02/25/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/</id>
@@ -107,48 +65,6 @@
     <category term="深度学习" scheme="https://cserdu.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
     
     <category term="Python" scheme="https://cserdu.github.io/tags/Python/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>测试文章</title>
-    <link href="https://cserdu.github.io/2023/02/25/text/"/>
-    <id>https://cserdu.github.io/2023/02/25/text/</id>
-    <published>2023-02-25T14:15:18.173Z</published>
-    <updated>2023-02-25T14:23:18.712Z</updated>
-    
-    <content type="html"><![CDATA[<p>这确实应该是每个开发人员都应该牢记的规则，而不只是个空头文字。</p><span id="more"></span><p>我再次强调一遍：如果你无法为合并请求提供合理的解释或者说明，那么请不要提交。真的就这么简单。在不解释为什么存在这些合并的情况下，绝对没有合并的借口。</p><p>在这种情况下，我真的认为如果合并请求都没有注释，那么合并还有什么意义！如果你觉得有理由的话，请说出来！让合并提交看起来更加合理。</p><p>因为现在它看起来完全没有意义。我真的厌恶毫无意义的合并。它们只会让历史看起来更糟，更难读懂。<br>————————————————<br>版权声明：本文为CSDN博主「CSDN资讯」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a href="https://blog.csdn.net/csdnnews/article/details/129187745">https://blog.csdn.net/csdnnews/article/details/129187745</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;这确实应该是每个开发人员都应该牢记的规则，而不只是个空头文字。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Python" scheme="https://cserdu.github.io/categories/Python/"/>
-    
-    
-    <category term="Anaconda" scheme="https://cserdu.github.io/tags/Anaconda/"/>
-    
-    <category term="Jupyter" scheme="https://cserdu.github.io/tags/Jupyter/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="https://cserdu.github.io/2023/02/25/hello-world/"/>
-    <id>https://cserdu.github.io/2023/02/25/hello-world/</id>
-    <published>2023-02-25T11:27:56.339Z</published>
-    <updated>2023-02-25T15:53:09.668Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for <span id="more"></span> more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="漫谈" scheme="https://cserdu.github.io/categories/%E6%BC%AB%E8%B0%88/"/>
-    
     
   </entry>
   
