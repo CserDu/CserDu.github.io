@@ -20,15 +20,22 @@
     var CONFIG = {"hostname":"cserdu.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false,"scrollpercent":true,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="CserDuのBlog">
-<meta property="og:url" content="https://cserdu.github.io/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/index.html">
+  <meta name="description" content="1. 前言对于生成模型来说，可控性是个很重要的问题。在ControlNet出现之前，主要以prompt作为引导条件来生成图像。因此，为了实现精确的可控生成，对prompt的要求就很高，通常会出现大量的prompt来引导图像生成，而ControlNet的出现使得精确控制成为了可能，接下来就详细介绍ControlNet的理论以及代码部分。 2. 理论分析​    我们首先从一个简单的网络结构开始：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ControlNet详解">
+<meta property="og:url" content="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/index.html">
 <meta property="og:site_name" content="CserDuのBlog">
+<meta property="og:description" content="1. 前言对于生成模型来说，可控性是个很重要的问题。在ControlNet出现之前，主要以prompt作为引导条件来生成图像。因此，为了实现精确的可控生成，对prompt的要求就很高，通常会出现大量的prompt来引导图像生成，而ControlNet的出现使得精确控制成为了可能，接下来就详细介绍ControlNet的理论以及代码部分。 2. 理论分析​    我们首先从一个简单的网络结构开始：">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323212258833.png">
+<meta property="og:image" content="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323220707178.png">
+<meta property="article:published_time" content="2023-03-23T13:10:03.000Z">
+<meta property="article:modified_time" content="2023-03-23T14:25:14.100Z">
 <meta property="article:author" content="CserDu">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323212258833.png">
 
-<link rel="canonical" href="https://cserdu.github.io/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/">
+<link rel="canonical" href="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/">
 
 
 <script id="page-configurations">
@@ -36,12 +43,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: 扩散模型 | CserDuのBlog</title>
+  <title>ControlNet详解 | CserDuのBlog</title>
   
 
 
@@ -183,57 +190,179 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="CserDu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CserDuのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ControlNet详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-03-23 21:10:03 / 修改时间：22:25:14" itemprop="dateCreated datePublished" datetime="2023-03-23T21:10:03+08:00">2023-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/" itemprop="url" rel="index"><span itemprop="name">扩散模型</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/" class="post-meta-item leancloud_visitors" data-flag-title="ControlNet详解" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">扩散模型
-          <small>标签</small>
-        </h2>
-      </div>
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2023</span>
+        <h4 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h4><p>对于生成模型来说，可控性是个很重要的问题。在ControlNet出现之前，主要以prompt作为引导条件来生成图像。因此，为了实现精确的可控生成，对prompt的要求就很高，通常会出现大量的prompt来引导图像生成，而ControlNet的出现使得精确控制成为了可能，接下来就详细介绍ControlNet的理论以及代码部分。</p>
+<h4 id="2-理论分析"><a href="#2-理论分析" class="headerlink" title="2. 理论分析"></a>2. 理论分析</h4><p>​    我们首先从一个简单的网络结构开始：</p>
+<p><img src="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323212258833.png" alt="image-20230323212258833"></p>
+<p>​                                                                        图1 ControlNet网络结构</p>
+<p>图1中，(a)图表示一个普通的神经网络结构$f(x;\Theta)$，输入特征图$x \in R^{h \times w \times c}$，输出特征图$y$，即：</p>
+<script type="math/tex; mode=display">
+y=f(x;\Theta)</script><p>ControlNet的做法就是把已经训好的神经网络的参数$\Theta$拷贝一份，变成可训练的$\Theta_{c}$，而原先的参数固定，这样做的好处是既可以保持原先网络的能力，还可以避免当数据集较小时出现过拟合现象。在(b)图中可以看到，除了有复制的参数外，还有zero convolution这样的结构。这个结构是一个大小为1X1，权重和偏置都是0的卷积核。定义第一个zero convolution为$Z(;\Theta_{z1})$，第二个为$Z(;\Theta_{z2})$，那么此时网络的输出可以表示为：</p>
+<script type="math/tex; mode=display">
+y_c=f(x;\Theta)+Z(f(x+Z(c;\Theta_{z1});\Theta_c);\Theta_{z2})</script><p>由于在刚开始$\Theta_{z1}$和$\Theta_{z2}$的参数值都是0，所以有：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+& Z(c;\Theta_{z1})=0 \\
+& f(x+Z(c;\Theta_{z1});\Theta_c)=f(x;\Theta_c)=f(x;\Theta) \\
+& Z(f(x+Z(c;\Theta_{z1});\Theta_c);\Theta_{z2})=Z(f(x;\Theta);\Theta_{z2})=0 \\
+& y_c=f(x;\Theta)+0=f(x;\Theta)
+\end{aligned}</script><p>公式$(3)$表明，在网络参数没有更新之前，ControlNet网络的输出和原网络是一样的，这也就是说保留了原网络的能力。</p>
+<p>接着我们来推导随着训练网络参数会发生什么样的变化。</p>
+<p>假设用$W$和$B$来表示zero convolution卷积的权重和偏置，初始值都是0，输入特征图是$I \in R^{h \times w \times c}$，$p$表示特征图上的空间位置，$i$表示通道索引，那么当$I$经过该卷积时：</p>
+<script type="math/tex; mode=display">
+Z(I;\{W,B\})_{p,i}=B_i+\sum_{j}^{c}I_{p,i}W_{i,j}</script><p>上式求导，得到：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+& \frac{\partial Z(I;\{W,B\})_{p,i} }{\partial B_i}=1 \\
+& \frac{\partial Z(I;\{W,B\})_{p,i} }{\partial I_{p,i}}=\sum_{j}^{c}W_{i,j}=0 \\
+& \frac{\partial Z(I;\{W,B\})_{p,i} }{\partial W_{i,j}}=I_{p,i} \neq 0
+\end{aligned}</script><p>从式$(5)$可以看出，初始时刻，$B$和$I$的梯度都是0，但由于输入特征图$I$不可能为0，所以$W$会获得梯度，也就会随着训练过程更新，那么$I$的梯度也会随之更新。</p>
+<h4 id="3-实际应用"><a href="#3-实际应用" class="headerlink" title="3. 实际应用"></a>3. 实际应用</h4><p>在实际场景中，ControlNet用于给stable diffusion model添加额外的控制条件，如下图所示：</p>
+<p><img src="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323220707178.png" alt="image-20230323220707178"></p>
+<p>​                                                                    图2 ControlNet用于Stable diffusion model</p>
+<p>原先Stable diffusion的参数被固定，前面一半的参数被复制一份用于训练，同时添加若干个zero convolution卷积块。其中Prompt就是文本条件，input就是特征图，Condition是额外添加的控制条件。在Stable diffusion model中，encoder和decoder都有12个blocks，再加上中间的一个block，一共25个blocks。ControlNet复制encoder的12个blocks以及一个mid block，每个block后面都跟随一个zero convolution结构，经过zero convolution的结果再与decoder的各个block相加。此外，由于输入input是原图经过编码的latent code，所以为了使得额外的控制条件Condition与input维度一致，Condition需要先经过一个tiny network编码到latent code中，之后再与input相加。</p>
+<p>在文章中，作者对8种不同的Condition做了实验，结果表明可以实现非常精确的条件控制。</p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-03-10T10:36:28+08:00"
-              content="2023-03-10">
-          03-10
-        </time>
-      </div>
+    <div>
+	
+	<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2023/03/10/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/" itemprop="url">
-            <span itemprop="name">扩散模型汇总</span>
-          </a>
-      </div>
+	
+    </div>
+        
 
-    </header>
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>CserDu
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/" title="ControlNet详解">https://cserdu.github.io/2023/03/23/ControlNet详解/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/03/10/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E6%B1%87%E6%80%BB/" rel="prev" title="扩散模型汇总">
+      <i class="fa fa-chevron-left"></i> 扩散模型汇总
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
   </article>
-
-    </div>
-  </div>
   
   
-  
-
   
 
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -280,6 +409,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%89%8D%E8%A8%80"><span class="nav-text">1. 前言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90"><span class="nav-text">2. 理论分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="nav-text">3. 实际应用</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

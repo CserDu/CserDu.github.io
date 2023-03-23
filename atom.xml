@@ -6,7 +6,7 @@
   <link href="https://cserdu.github.io/atom.xml" rel="self"/>
   
   <link href="https://cserdu.github.io/"/>
-  <updated>2023-03-08T11:35:44.112Z</updated>
+  <updated>2023-03-23T14:25:14.100Z</updated>
   <id>https://cserdu.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ControlNet详解</title>
+    <link href="https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/"/>
+    <id>https://cserdu.github.io/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/</id>
+    <published>2023-03-23T13:10:03.000Z</published>
+    <updated>2023-03-23T14:25:14.100Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h4><p>对于生成模型来说，可控性是个很重要的问题。在ControlNet出现之前，主要以prompt作为引导条件来生成图像。因此，为了实现精确的可控生成，对prompt的要求就很高，通常会出现大量的prompt来引导图像生成，而ControlNet的出现使得精确控制成为了可能，接下来就详细介绍ControlNet的理论以及代码部分。</p><h4 id="2-理论分析"><a href="#2-理论分析" class="headerlink" title="2. 理论分析"></a>2. 理论分析</h4><p>​    我们首先从一个简单的网络结构开始：</p><p><img src="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323212258833.png" alt="image-20230323212258833"></p><p>​                                                                        图1 ControlNet网络结构</p><p>图1中，(a)图表示一个普通的神经网络结构$f(x;\Theta)$，输入特征图$x \in R^{h \times w \times c}$，输出特征图$y$，即：</p><script type="math/tex; mode=display">y=f(x;\Theta)</script><p>ControlNet的做法就是把已经训好的神经网络的参数$\Theta$拷贝一份，变成可训练的$\Theta_{c}$，而原先的参数固定，这样做的好处是既可以保持原先网络的能力，还可以避免当数据集较小时出现过拟合现象。在(b)图中可以看到，除了有复制的参数外，还有zero convolution这样的结构。这个结构是一个大小为1X1，权重和偏置都是0的卷积核。定义第一个zero convolution为$Z(;\Theta_{z1})$，第二个为$Z(;\Theta_{z2})$，那么此时网络的输出可以表示为：</p><script type="math/tex; mode=display">y_c=f(x;\Theta)+Z(f(x+Z(c;\Theta_{z1});\Theta_c);\Theta_{z2})</script><p>由于在刚开始$\Theta_{z1}$和$\Theta_{z2}$的参数值都是0，所以有：</p><script type="math/tex; mode=display">\begin{aligned}& Z(c;\Theta_{z1})=0 \\& f(x+Z(c;\Theta_{z1});\Theta_c)=f(x;\Theta_c)=f(x;\Theta) \\& Z(f(x+Z(c;\Theta_{z1});\Theta_c);\Theta_{z2})=Z(f(x;\Theta);\Theta_{z2})=0 \\& y_c=f(x;\Theta)+0=f(x;\Theta)\end{aligned}</script><p>公式$(3)$表明，在网络参数没有更新之前，ControlNet网络的输出和原网络是一样的，这也就是说保留了原网络的能力。</p><p>接着我们来推导随着训练网络参数会发生什么样的变化。</p><p>假设用$W$和$B$来表示zero convolution卷积的权重和偏置，初始值都是0，输入特征图是$I \in R^{h \times w \times c}$，$p$表示特征图上的空间位置，$i$表示通道索引，那么当$I$经过该卷积时：</p><script type="math/tex; mode=display">Z(I;\{W,B\})_{p,i}=B_i+\sum_{j}^{c}I_{p,i}W_{i,j}</script><p>上式求导，得到：</p><script type="math/tex; mode=display">\begin{aligned}& \frac{\partial Z(I;\{W,B\})_{p,i} }{\partial B_i}=1 \\& \frac{\partial Z(I;\{W,B\})_{p,i} }{\partial I_{p,i}}=\sum_{j}^{c}W_{i,j}=0 \\& \frac{\partial Z(I;\{W,B\})_{p,i} }{\partial W_{i,j}}=I_{p,i} \neq 0\end{aligned}</script><p>从式$(5)$可以看出，初始时刻，$B$和$I$的梯度都是0，但由于输入特征图$I$不可能为0，所以$W$会获得梯度，也就会随着训练过程更新，那么$I$的梯度也会随之更新。</p><h4 id="3-实际应用"><a href="#3-实际应用" class="headerlink" title="3. 实际应用"></a>3. 实际应用</h4><p>在实际场景中，ControlNet用于给stable diffusion model添加额外的控制条件，如下图所示：</p><p><img src="/2023/03/23/ControlNet%E8%AF%A6%E8%A7%A3/image-20230323220707178.png" alt="image-20230323220707178"></p><p>​                                                                    图2 ControlNet用于Stable diffusion model</p><p>原先Stable diffusion的参数被固定，前面一半的参数被复制一份用于训练，同时添加若干个zero convolution卷积块。其中Prompt就是文本条件，input就是特征图，Condition是额外添加的控制条件。在Stable diffusion model中，encoder和decoder都有12个blocks，再加上中间的一个block，一共25个blocks。ControlNet复制encoder的12个blocks以及一个mid block，每个block后面都跟随一个zero convolution结构，经过zero convolution的结果再与decoder的各个block相加。此外，由于输入input是原图经过编码的latent code，所以为了使得额外的控制条件Condition与input维度一致，Condition需要先经过一个tiny network编码到latent code中，之后再与input相加。</p><p>在文章中，作者对8种不同的Condition做了实验，结果表明可以实现非常精确的条件控制。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h4 id=&quot;1-前言&quot;&gt;&lt;a href=&quot;#1-前言&quot; class=&quot;headerlink&quot; title=&quot;1. 前言&quot;&gt;&lt;/a&gt;1. 前言&lt;/h4&gt;&lt;p&gt;对于生成模型来说，可控性是个很重要的问题。在ControlNet出现之前，主要以prompt作为引导条件来生成图像。因此</summary>
+      
+    
+    
+    
+    <category term="扩散模型" scheme="https://cserdu.github.io/categories/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>扩散模型汇总</title>
