@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="200" fill="url(#bg)"/>
+  <text x="200" y="180" font-family="Georgia, serif" font-size="120" fill="white" text-anchor="middle" dominant-baseline="middle" font-weight="bold">HD</text>
+  <text x="200" y="260" font-family="Inter, sans-serif" font-size="28" fill="rgba(255,255,255,0.8)" text-anchor="middle">Henghui Du</text>
+</svg>
